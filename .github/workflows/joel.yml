@@ -1,15 +1,25 @@
-version: '3.8'
+name: Probar script joel.py
 
-services:
-  entorno-prueba:
-    image: ubuntu:latest
-    container_name: probando_joel
-    volumes:
-      - .:/app # Esto comparte tu carpeta actual con el Ubuntu
-    working_dir: /app
-    # Comandos para actualizar Ubuntu, instalar Python y ejecutar tu script
-    command: >
-      bash -c "apt-get update && 
-      apt-get install -y python3 python3-pip && 
-      echo '--- Ejecutando joel.py ---' && 
-      python3 joel.py"
+# Se ejecuta automáticamente cada vez que subes cambios (push)
+on: [push, workflow_dispatch]
+
+jobs:
+  pruebas:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Descargar el código del repositorio
+      uses: actions/checkout@v4
+
+    - name: Configurar Python en Ubuntu
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.x' # Instala la última versión estable de Python
+
+    # DESCOMENTA LAS SIGUIENTES LÍNEAS SI TU SCRIPT NECESITA LIBRERÍAS (requirements.txt)
+    # - name: Instalar dependencias
+    #   run: |
+    #     pip install -r requirements.txt
+
+    - name: Ejecutar joel.py
+      run: python joel.py

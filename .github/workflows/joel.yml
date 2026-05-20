@@ -1,1 +1,15 @@
+version: '3.8'
 
+services:
+  entorno-prueba:
+    image: ubuntu:latest
+    container_name: probando_joel
+    volumes:
+      - .:/app # Esto comparte tu carpeta actual con el Ubuntu
+    working_dir: /app
+    # Comandos para actualizar Ubuntu, instalar Python y ejecutar tu script
+    command: >
+      bash -c "apt-get update && 
+      apt-get install -y python3 python3-pip && 
+      echo '--- Ejecutando joel.py ---' && 
+      python3 joel.py"

@@ -1,7 +1,10 @@
 name: Probar script joel.py
 
-# Se ejecuta automáticamente cada vez que subes cambios (push)
 on: [push, workflow_dispatch]
+
+# Esto soluciona la advertencia de Node.js en 2026
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
 jobs:
   pruebas:
@@ -14,12 +17,7 @@ jobs:
     - name: Configurar Python en Ubuntu
       uses: actions/setup-python@v5
       with:
-        python-version: '3.x' # Instala la última versión estable de Python
-
-    # DESCOMENTA LAS SIGUIENTES LÍNEAS SI TU SCRIPT NECESITA LIBRERÍAS (requirements.txt)
-    # - name: Instalar dependencias
-    #   run: |
-    #     pip install -r requirements.txt
+        python-version: '3.x'
 
     - name: Ejecutar joel.py
       run: python joel.py

@@ -3,14 +3,15 @@ from bs4 import BeautifulSoup
 import re
 
 def hacer_scraping_real():
-    # URL de la sección de anime en 3Cat
-    url = "https://www.ccma.cat/3cat/anime/"
+    # URL real y correcta de la colección de anime de 3Cat
+    url = "https://www.3cat.cat/3cat/coleccio/29850/"
     
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Accept-Language": "ca,es;q=0.9"
     }
     
-    print("Conectando con 3Cat para extraer HTML real...")
+    print(f"Conectando con 3Cat ({url}) para extraer HTML real...")
     
     lista_animes = []
     usando_plan_b = False
@@ -25,6 +26,7 @@ def hacer_scraping_real():
             
             for enllac in enlaces:
                 href = enllac['href']
+                # Buscamos el patrón que vimos en tu HTML: /3cat/nombre-del-anime/video/...
                 if "/3cat/" in href and "/video/" in href:
                     match = re.search(r'/3cat/([^/]+)/video/', href)
                     if match:
@@ -35,18 +37,18 @@ def hacer_scraping_real():
             
             lista_animes = sorted(list(titulos_animes))
             
-            # Si el HTML estaba vacío o cambió la estructura
+            # Si por algún cambio de estructura no encuentra nada
             if not lista_animes:
-                print("[!] Alerta: No se pudieron aislar elementos en el HTML.")
+                print("[!] Alerta: No se extrajeron títulos del HTML.")
                 lista_animes = obtener_plan_b()
                 usando_plan_b = True
         else:
-            print(f"[!] Alerta: Servidor respondió con código {response.status_code}.")
+            print(f"[!] Alerta: El servidor respondió con código {response.status_code}.")
             lista_animes = obtener_plan_b()
             usando_plan_b = True
             
     except Exception as e:
-        print(f"[!] Alerta: Error de conexión u operación: {e}")
+        print(f"[!] Alerta: Error durante la ejecución: {e}")
         lista_animes = obtener_plan_b()
         usando_plan_b = True
 
@@ -66,14 +68,19 @@ def hacer_scraping_real():
 
 
 def limpiar_nombre_anime(slug):
-    """Transforma 'saint-seiya-el-quadre-perdut-cap-1' en 'Saint Seiya El Quadre Perdut'"""
-    slug = re.sub(r'-(cap|capitol|temporada|t\d+|x\d+|\d+).*$', '', slug, flags=re.IGNORECASE)
+    """Limpia los slugs de las URLs para extraer el nombre de la serie"""
+    # Quitar coletillas de capítulos/temporadas (ej: -cap-1, -capitol-1, -t1xc1)
+    slug = re.sub(r'-(cap|capitol|temporada|t\d+x\d+|t\d+|\d+).*$', '', slug, flags=re.IGNORECASE)
+    
+    # Reemplazar guiones por espacios y capitalizar palabras
     nombre = slug.replace('-', ' ').title()
     
+    # Diccionario para pulir nombres específicos basados en tu HTML
     correcciones = {
         "Saint Seiya El Quadre Perdut": "Saint Seiya: El Quadre Perdut",
         "Crueltat": "Guardians de la Nit (Kimetsu no Yaiba)",
-        "Evangelion": "Neon Genesis Evangelion"
+        "Evangelion": "Neon Genesis Evangelion",
+        "L Alquimista D Acer": "Fullmetal Alchemist: Brotherhood"
     }
     return corrections.get(nombre, nombre)
 

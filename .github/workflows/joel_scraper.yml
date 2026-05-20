@@ -1,7 +1,8 @@
-name: Scraping de Anime en 3Cat
+name: Scraping de Anime en 3Cat (Manual)
 
-# Se ejecuta al hacer un push o manualmente desde la pestaña Actions
-on: [push, workflow_dispatch]
+# 'workflow_dispatch' activa el botón para ejecutarlo manualmente
+on: 
+  workflow_dispatch:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
@@ -19,9 +20,9 @@ jobs:
       with:
         python-version: '3.x'
 
-    - name: 3. Instalar librerías de Scraping (Requests y BS4)
+    - name: 3. Instalar librerías de Scraping
       run: |
         pip install requests beautifulsoup4
 
-    - name: 4. Ejecutar el script de scraping
+    - name: 4. Ejecutar el script y mostrar lista
       run: python scraping_3cat.py

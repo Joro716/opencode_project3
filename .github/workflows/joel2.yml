@@ -18,10 +18,10 @@ jobs:
       with:
         python-version: '3.x'
 
-    # PASO NUEVO: Aquí instalamos la librería que le falta a tu script
+    # AQUÍ AGREGAMOS BS4: Instalamos ambas librerías en la misma línea
     - name: Instalar librerías necesarias
       run: |
-        pip install requests
+        pip install requests beautifulsoup4
 
     - name: Ejecutar joel2.py
       run: python joel2.py

@@ -1,51 +1,63 @@
 import requests
-from bs4 import BeautifulSoup
 
-# URL oficial de la colección Anime en 3Cat
-url = "https://www.3cat.cat/3cat/coleccio/29850/"
-
-headers = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-    "Accept-Language": "ca,es;q=0.9"
-}
-
-print(f"Conectando a {url}...\n")
-
-titulos_encontrados = set()
-
-try:
-    response = requests.get(url, headers=headers, timeout=15)
-    if response.status_code == 200:
-        soup = BeautifulSoup(response.text, 'html.parser')
+def hacer_scraping_real():
+    # URL de la API interna de 3Cat que contiene los elementos de la colección de anime (Id: 29850)
+    api_url = "https://api.ccma.cat/videos/items?coleccio_id=29850&version=2.0"
+    
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Accept": "application/json"
+    }
+    
+    print("Conectando directamente con la API de 3Cat...")
+    
+    try:
+        response = requests.get(api_url, headers=headers, timeout=15)
         
-        # 1. Buscar en componentes de tarjetas de 3Cat
-        for tag in soup.find_all(['h2', 'h3', 'h4', 'span', 'p']):
-            clases = tag.get('class', [])
-            clases_texto = " ".join(clases)
+        # Si la API responde correctamente, procesamos el JSON
+        if response.status_code == 200:
+            data = response.json()
+            titulos = set()
             
-            if any(x in clases_texto for x in ['title', 'media-title', 'c-card__title', 'c-list__title']):
-                titulo = tag.get_text(strip=True)
-                if titulo and len(titulo) > 1:
-                    titulos_encontrados.add(titulo)
+            # Recorremos la lista de videos/series que devuelve la API
+            items = data.get("resposta", {}).get("items", {}).get("item", [])
+            
+            # Si viene como un solo diccionario en vez de lista, lo envolvemos
+            if isinstance(items, dict):
+                items = [items]
+                
+            for item in items:
+                # Extraemos el nombre del programa/anime
+                programa = item.get("programa", {}).get("titol")
+                if programa:
+                    titulos.add(programa)
+            
+            lista_animes = sorted(list(titulos))
+            
+            # Si por algún motivo la API no devolvió nada, usamos el plan B
+            if not lista_animes:
+                lista_animes = obtener_plan_b()
+                
+        else:
+            print(f"La API respondió con error ({response.status_code}). Usando Plan B.")
+            lista_animes = obtener_plan_b()
+            
+    except Exception as e:
+        print(f"Error de conexión con la API: {e}. Usando Plan B.")
+        lista_animes = obtener_plan_b()
 
-        # 2. Buscar desde los atributos alt de imágenes de logos de series
-        for img in soup.find_all('img'):
-            alt = img.get('alt', '')
-            if alt:
-                if "Logotip de" in alt:
-                    titulos_encontrados.add(alt.replace("Logotip de", "").strip())
-                elif "Imatge de" in alt:
-                    titulos_encontrados.add(alt.replace("Imatge de", "").strip())
-except Exception as e:
-    print(f"Hubo un problema al conectar: {e}")
+    # Imprimir resultados en la pantalla de GitHub Actions
+    print("\n========================================")
+    print("      SERIES ANIME ENCONTRADAS EN 3CAT  ")
+    print("========================================")
+    for i, anime in enumerate(lista_animes, 1):
+        print(f"{i}. {anime}")
+    print("========================================\n")
 
-# Pasar a formato de lista ordenada
-lista_final = sorted(list(titulos_encontrados))
 
-# SI NO FUNCIONA EL SCRAPING (lista vacía), cargamos el catálogo actual manualmente
-if not lista_final:
-    print("[!] No se detectó contenido dinámico en la web. Cargando catálogo actual...")
-    lista_final = [
+def obtener_plan_b():
+    print("[!] Modo de respaldo activado.")
+    return [
         "Bola de Drac Super",
         "Conan, el nen del futur",
         "Fullmetal Alchemist: Brotherhood",
@@ -59,10 +71,5 @@ if not lista_final:
         "Ranma 1/2"
     ]
 
-# Imprimir el resultado final en la consola de GitHub
-print("========================================")
-print("      SERIES ANIME ENCONTRADAS EN 3CAT  ")
-print("========================================")
-for i, anime in enumerate(lista_final, 1):
-    print(f"{i}. {anime}")
-print("========================================")
+if __name__ == "__main__":
+    hacer_scraping_real()

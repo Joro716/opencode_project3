@@ -1,0 +1,27 @@
+name: Scraping de Anime en 3Cat
+
+# Se ejecuta al hacer un push o manualmente desde la pestaña Actions
+on: [push, workflow_dispatch]
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+jobs:
+  scraper_job:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 1. Copiar el repositorio de GitHub
+      uses: actions/checkout@v4
+
+    - name: 2. Configurar el entorno de Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.x'
+
+    - name: 3. Instalar librerías de Scraping (Requests y BS4)
+      run: |
+        pip install requests beautifulsoup4
+
+    - name: 4. Ejecutar el script de scraping
+      run: python scraping_3cat.py

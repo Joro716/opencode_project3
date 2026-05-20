@@ -3,7 +3,6 @@ from bs4 import BeautifulSoup
 import re
 
 def hacer_scraping_real():
-    # URL real y correcta de la colección de anime de 3Cat
     url = "https://www.3cat.cat/3cat/coleccio/29850/"
     
     headers = {
@@ -26,7 +25,6 @@ def hacer_scraping_real():
             
             for enllac in enlaces:
                 href = enllac['href']
-                # Buscamos el patrón que vimos en tu HTML: /3cat/nombre-del-anime/video/...
                 if "/3cat/" in href and "/video/" in href:
                     match = re.search(r'/3cat/([^/]+)/video/', href)
                     if match:
@@ -37,7 +35,6 @@ def hacer_scraping_real():
             
             lista_animes = sorted(list(titulos_animes))
             
-            # Si por algún cambio de estructura no encuentra nada
             if not lista_animes:
                 print("[!] Alerta: No se extrajeron títulos del HTML.")
                 lista_animes = obtener_plan_b()
@@ -52,7 +49,6 @@ def hacer_scraping_real():
         lista_animes = obtener_plan_b()
         usando_plan_b = True
 
-    # Imprimir los resultados con el aviso de estado
     print("\n========================================")
     if usando_plan_b:
         print("  ⚠️  ESTADO: FALLÓ EL SCRAPING EN VIVO ")
@@ -69,20 +65,17 @@ def hacer_scraping_real():
 
 def limpiar_nombre_anime(slug):
     """Limpia los slugs de las URLs para extraer el nombre de la serie"""
-    # Quitar coletillas de capítulos/temporadas (ej: -cap-1, -capitol-1, -t1xc1)
     slug = re.sub(r'-(cap|capitol|temporada|t\d+x\d+|t\d+|\d+).*$', '', slug, flags=re.IGNORECASE)
-    
-    # Reemplazar guiones por espacios y capitalizar palabras
     nombre = slug.replace('-', ' ').title()
     
-    # Diccionario para pulir nombres específicos basados en tu HTML
+    # CORREGIDO: Ahora el nombre del diccionario coincide con el return
     correcciones = {
         "Saint Seiya El Quadre Perdut": "Saint Seiya: El Quadre Perdut",
         "Crueltat": "Guardians de la Nit (Kimetsu no Yaiba)",
         "Evangelion": "Neon Genesis Evangelion",
         "L Alquimista D Acer": "Fullmetal Alchemist: Brotherhood"
     }
-    return corrections.get(nombre, nombre)
+    return correcciones.get(nombre, nombre)
 
 
 def obtener_plan_b():

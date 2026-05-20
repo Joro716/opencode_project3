@@ -1,1 +1,27 @@
+name: Probar script joel 2.py
 
+on: [push, workflow_dispatch]
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+jobs:
+  pruebas:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Descargar el código del repositorio
+      uses: actions/checkout@v4
+
+    - name: Configurar Python en Ubuntu
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.x'
+
+    # PASO NUEVO: Aquí instalamos la librería que le falta a tu script
+    - name: Instalar librerías necesarias
+      run: |
+        pip install requests
+
+    - name: Ejecutar joel2.py
+      run: python joel2.py
